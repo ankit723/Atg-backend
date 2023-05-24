@@ -134,7 +134,7 @@ app.post('/post', async (req, res) => {
   }
 });
 
-//get the post item to the backend
+//get the post item to the frontend that only user posted
 app.get('/post', async (req, res) => {
   try {
     const { title, userId } = req.query;
@@ -152,6 +152,24 @@ app.get('/post', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+//get the post item to the frontend that every user posted
+app.get('/otherpost', async (req, res) => {
+  try {
+    const { title, userId } = req.query;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const posts = await Post.find({user:{$ne:user._id}});
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 //Delete the Post
 app.post('/postdelete', async (req, res)=> {

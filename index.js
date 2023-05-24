@@ -45,6 +45,8 @@ const postSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  likes: { type: Number, default: 0 },
+  dislikes: { type: Number, default: 0 },
 });
 
 const Post = mongoose.model('Post', postSchema);
@@ -68,6 +70,7 @@ app.post("/login", async(req, res)=> {
   }
 )
 
+
 app.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -88,6 +91,7 @@ app.post('/register', async (req, res) => {
     res.send({ message: 'Server error' });
   }
 });
+
 
 //Forgot Password
 app.post('/forgot', (req, res)=>{
@@ -110,6 +114,7 @@ app.post('/forgot', (req, res)=>{
     console.error("Error Fetching User", err)
   })
 });
+
 
 // Create a post item
 app.post('/post', async (req, res) => {
@@ -134,6 +139,7 @@ app.post('/post', async (req, res) => {
   }
 });
 
+
 //get the post item to the frontend that only user posted
 app.get('/post', async (req, res) => {
   try {
@@ -152,6 +158,7 @@ app.get('/post', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 //get the post item to the frontend that every user posted
 app.get('/otherpost', async (req, res) => {
@@ -197,6 +204,35 @@ app.post('/postupdate', (req, res)=> {
   })
   
 });
+
+
+//liking the post
+app.post('/api/posts/:postId/like', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    post.likes++;
+    await post.save();
+    res.json(post);
+  } catch (error) {
+    console.error('Error liking post:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+//disliking the post
+app.post('/api/posts/:postId/dislike', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    post.dislikes++;
+    await post.save();
+    res.json(post);
+  } catch (error) {
+    console.error('Error disliking post:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.listen(9002, ()=>{
     console.log("BE Started at port 9002")
